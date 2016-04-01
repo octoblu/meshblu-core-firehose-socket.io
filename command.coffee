@@ -18,7 +18,7 @@ class Command
   run: =>
     @panic new Error('Missing required environment variable: ALIAS_SERVER_URI') unless @serverOptions.aliasServerUri? # allowed to be empty
     @panic new Error('Missing required environment variable: REDIS_URI') if _.isEmpty @serverOptions.redisUri
-    @panic new Error('Missing required environment variable: MESHBLU_HOST') if _.isEmpty @serverOptions.meshbluConfig.host
+    @panic new Error('Missing required environment variable: MESHBLU_HOSTNAME') if _.isEmpty @serverOptions.meshbluConfig.hostname
     @panic new Error('Missing required environment variable: MESHBLU_PORT') if _.isEmpty @serverOptions.meshbluConfig.port
     @panic new Error('Missing required environment variable: MESHBLU_PROTOCOL') if _.isEmpty @serverOptions.meshbluConfig.protocol
 
