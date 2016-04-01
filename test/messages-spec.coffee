@@ -9,37 +9,58 @@ describe 'receiving messages', ->
   beforeEach ->
     @client = new RedisNS 'ns', redis.createClient('redis://localhost')
 
-  beforeEach ->
-    @meshbluHttp = shmock 0xbabe
-
-  beforeEach (done) ->
-    @connect = new Connect
-    @connect.connect (error, things) =>
-      return done error if error?
-      {@sut,@connection,@device} = things
-      done()
-
-  afterEach (done) ->
-    @connect.shutItDown done
-
-  afterEach (done) ->
-    @meshbluHttp.close done
-
-  describe 'when called', ->
+  context 'when successful', ->
     beforeEach ->
+      @meshbluHttp = shmock 0xbabe
       @meshbluHttp.get('/v2/whoami')
-        .reply 200, '{}'
+        .reply 200, uuid: 'masseuse'
 
     beforeEach (done) ->
-      message =
-        metadata:
-          code: 204
-
-      @connection.on 'message', (@message) =>
+      @connect = new Connect
+      @connect.connect (error, things) =>
+        return done error if error?
+        {@sut,@connection,@device} = things
         done()
 
-      @client.publish 'masseuse', JSON.stringify(message), (error) =>
-        return done error if error?
+    afterEach (done) ->
+      @connect.shutItDown done
 
-    it 'should send a message', ->
-      expect(@message).to.deep.equal {"metadata":{"code":204}}
+    afterEach (done) ->
+      @meshbluHttp.close done
+
+    describe 'when called', ->
+
+      beforeEach (done) ->
+        message =
+          metadata:
+            code: 204
+
+        @connection.on 'message', (@message) =>
+          done()
+
+        @client.publish 'masseuse', JSON.stringify(message), (error) =>
+          return done error if error?
+
+      it 'should send a message', ->
+        expect(@message).to.deep.equal {"metadata":{"code":204}}
+
+  context 'when failed', ->
+    beforeEach ->
+      @meshbluHttp = shmock 0xbabe
+      @meshbluHttp.get('/v2/whoami')
+        .reply 403
+
+    beforeEach (done) ->
+      @connect = new Connect
+      @connect.connect (@error, things) =>
+        done()
+
+    afterEach (done) ->
+      @connect.shutItDown done
+
+    afterEach (done) ->
+      @meshbluHttp.close done
+
+    describe 'when called', ->
+      it 'should have an error', ->
+        expect(@error).to.exist

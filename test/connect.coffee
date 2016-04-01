@@ -14,24 +14,26 @@ class Connect
       @createConnection
     ], (error) =>
       return callback error if error?
-      @connection.connect()
       @connection.on 'connect', =>
         callback null,
           sut: @sut
           connection: @connection
           device: {uuid: 'masseuse', token: 'assassin'}
 
+      @connection.on 'connect_error', (error) =>
+        callback error
+
+      @connection.connect uuid: 'masseuse'
+
   shutItDown: (callback) =>
     @connection.close()
-
-    async.series [
-      async.apply @sut.stop
-    ], callback
+    @sut.stop callback
 
   startServer: (callback) =>
     @sut = new Server
       port: 0xcafe
       meshbluConfig:
+        hostname: 'localhost'
         server: 'localhost'
         port:   0xbabe
         protocol: 'http'
