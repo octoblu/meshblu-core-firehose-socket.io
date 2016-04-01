@@ -1,5 +1,3 @@
-_             = require 'lodash'
-redis         = require 'redis'
 Server        = require './src/server'
 MeshbluConfig = require 'meshblu-config'
 

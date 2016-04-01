@@ -14,7 +14,8 @@ class Connect
       @createConnection
     ], (error) =>
       return callback error if error?
-      @connection.on 'ready', =>
+      @connection.connect()
+      @connection.on 'connect', =>
         callback null,
           sut: @sut
           connection: @connection
@@ -33,6 +34,7 @@ class Connect
       meshbluConfig:
         server: 'localhost'
         port:   0xbabe
+        protocol: 'http'
       redisUri: 'redis://localhost'
       namespace: 'ns'
 
@@ -40,15 +42,12 @@ class Connect
 
   createConnection: (callback) =>
     @connection = new MeshbluFirehoseSocketIO
-      server: 'localhost'
-      port: 0xcafe
-      uuid: 'masseuse'
-      token: 'assassin'
-      options: transports: ['websocket']
-
-    @connection.on 'notReady', (error) =>
-      console.error error.stack
-      throw error
+      meshbluConfig:
+        hostname: 'localhost'
+        port: 0xcafe
+        uuid: 'masseuse'
+        token: 'assassin'
+        protocol: 'http'
 
     callback()
 

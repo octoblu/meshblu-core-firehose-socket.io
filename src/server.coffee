@@ -4,7 +4,7 @@ SocketIO              = require 'socket.io'
 SocketIOHandler       = require './socket-io-handler'
 redis                 = require 'ioredis'
 RedisNS               = require '@octoblu/redis-ns'
-MessengerFactory      = require './messenger-factory'
+HydrantManagerFactory = require 'meshblu-core-manager-hydrant/factory'
 UuidAliasResolver     = require 'meshblu-uuid-alias-resolver'
 
 class Server
@@ -18,7 +18,9 @@ class Server
   run: (callback) =>
     @server = http.createServer()
 
-    uuidAliasClient = _.bindAll new RedisNS 'uuid-alias', redis.createClient(@redisUri)
+    uuidAliasClient = new RedisNS 'uuid-alias', redis.createClient(@redisUri)
+    uuidAliasResolver = new UuidAliasResolver client: uuidAliasClient
+    @hydrantManagerFactory = new HydrantManagerFactory {uuidAliasResolver, @namespace}
 
     @server.on 'request', @onRequest
     @io = SocketIO @server
@@ -29,7 +31,7 @@ class Server
     @server.close callback
 
   onConnection: (socket) =>
-    socketIOHandler = new SocketIOHandler {socket, @meshbluConfig, @messengerFactory}
+    socketIOHandler = new SocketIOHandler {socket, @meshbluConfig, @hydrantManagerFactory}
     socketIOHandler.initialize()
 
   onRequest: (request, response) =>

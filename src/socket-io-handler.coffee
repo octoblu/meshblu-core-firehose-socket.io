@@ -1,16 +1,27 @@
-_     = require 'lodash'
-async = require 'async'
+_           = require 'lodash'
+async       = require 'async'
+MeshbluHttp = require 'meshblu-http'
 
 class SocketIOHandler
-  constructor: ({@socket,@meshbluConfig,@messengerFactory}) ->
+  constructor: ({@socket,@meshbluConfig,@hydrantManagerFactory}) ->
 
   initialize: =>
-    @messenger = @messengerFactory.build()
+    uuid = @socket.client.request.headers['x-meshblu-uuid']
+    token = @socket.client.request.headers['x-meshblu-token']
+    config = _.extend {uuid, token}, @meshbluConfig
+    console.log config
+    meshbluHttp = new MeshbluHttp config
+    meshbluHttp.whoami (error, data) =>
+      console.log error, data
 
-    @messenger.on 'message', (channel, message) =>
-      @socket.emit 'message', message
+      @firehose = @hydrantManagerFactory.build uuid
+      @firehose.on 'message', (message) =>
+        @socket.emit 'message', message
+
+      @firehose.connect (error) =>
+        throw error if error?
 
   onDisconnect: =>
-    @messenger?.close()
+    @firehose?.close()
 
 module.exports = SocketIOHandler
