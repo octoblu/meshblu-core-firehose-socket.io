@@ -1,6 +1,6 @@
 {
   "name": "meshblu-core-firehose-socket.io",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Meshblu Firehose for socket.io",
   "main": "command.js",
   "scripts": {
