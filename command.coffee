@@ -8,7 +8,7 @@ class Command
       port:                         process.env.PORT || 80
       aliasServerUri:               process.env.ALIAS_SERVER_URI
       redisUri:                     process.env.REDIS_URI
-      namespace:                    process.env.NAMESPACE || 'meshblu:messages'
+      namespace:                    process.env.NAMESPACE || 'messages'
       meshbluConfig:                new MeshbluConfig().toJSON()
 
   panic: (error) =>
