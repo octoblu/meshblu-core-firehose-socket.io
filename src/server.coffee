@@ -21,7 +21,7 @@ class Server
 
     uuidAliasClient = new RedisNS 'uuid-alias', redis.createClient(@redisUri)
     uuidAliasResolver = new UuidAliasResolver client: uuidAliasClient
-    @hydrantManagerFactory = new HydrantManagerFactory {uuidAliasResolver, @namespace}
+    @hydrantManagerFactory = new HydrantManagerFactory {uuidAliasResolver, @namespace, @redisUri}
 
     @server.on 'request', @onRequest
     @io = SocketIO @server, allowRequest: @verifyRequest
