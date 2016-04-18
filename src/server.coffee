@@ -7,6 +7,7 @@ RedisNS               = require '@octoblu/redis-ns'
 HydrantManagerFactory = require 'meshblu-core-manager-hydrant/factory'
 UuidAliasResolver     = require 'meshblu-uuid-alias-resolver'
 MeshbluHttp           = require 'meshblu-http'
+URL                   = require 'url'
 
 class Server
   constructor: (options) ->
@@ -46,12 +47,18 @@ class Server
     response.end()
 
   verifyRequest: (request, callback) =>
-    uuid = request.headers['x-meshblu-uuid']
-    token = request.headers['x-meshblu-token']
-    config = _.extend {uuid, token}, @meshbluConfig
+    {uuid, token} = @getAuth request
+    config = _.assign {uuid, token}, @meshbluConfig
     meshbluHttp = new MeshbluHttp config
     meshbluHttp.whoami (error, data) =>
       return callback error if error?
       callback null, data?.uuid == uuid
+
+  getAuth: (request) =>
+    uuid = request.headers['x-meshblu-uuid']
+    token = request.headers['x-meshblu-token']
+    return {uuid, token} if uuid && token
+    {query} = URL.parse request.url, true
+    return uuid: query.uuid, token: query.token
 
 module.exports = Server

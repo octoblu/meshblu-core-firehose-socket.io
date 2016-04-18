@@ -23,7 +23,7 @@ class Connect
       @connection.on 'connect_error', (error) =>
         callback error
 
-      @connection.connect uuid: 'masseuse'
+      @connection.connect uuid: 'masseuse', =>
 
   shutItDown: (callback) =>
     @connection.close()

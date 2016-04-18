@@ -1,11 +1,15 @@
 _           = require 'lodash'
 async       = require 'async'
+URL         = require 'url'
 
 class SocketIOHandler
   constructor: ({@socket,@meshbluConfig,@hydrantManagerFactory}) ->
 
   initialize: =>
-    uuid = @socket.client.request.headers['x-meshblu-uuid']
+    {pathname} = URL.parse @socket.client.request.url
+    # has a trailing slash
+    uuid = _.first _.takeRight pathname.split(/\//), 2
+
     @firehose = @hydrantManagerFactory.build()
     @firehose.on 'message', (message) =>
       @socket.emit 'message', message
