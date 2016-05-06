@@ -12,8 +12,8 @@ describe 'receiving messages', ->
   context 'when successful', ->
     beforeEach ->
       @meshbluHttp = shmock 0xbabe
-      @meshbluHttp.get('/v2/whoami')
-        .reply 200, uuid: 'masseuse'
+      @meshbluHttp.post('/authenticate')
+        .reply 204
 
     beforeEach (done) ->
       @connect = new Connect
@@ -42,12 +42,12 @@ describe 'receiving messages', ->
           return done error if error?
 
       it 'should send a message', ->
-        expect(@message).to.deep.equal {"metadata":{"code":204}}
+        expect(@message).to.deep.equal {"metadata":{"code":204}, rawData: undefined}
 
   context 'when failed', ->
     beforeEach ->
       @meshbluHttp = shmock 0xbabe
-      @meshbluHttp.get('/v2/whoami')
+      @meshbluHttp.post('/authenticate')
         .reply 403
 
     beforeEach (done) ->

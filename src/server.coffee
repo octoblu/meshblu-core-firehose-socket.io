@@ -50,9 +50,15 @@ class Server
     {uuid, token} = @getAuth request
     config = _.assign {uuid, token}, @meshbluConfig
     meshbluHttp = new MeshbluHttp config
-    meshbluHttp.whoami (error, data) =>
-      return callback error if error?
-      callback null, data?.uuid == uuid
+    meshbluHttp.authenticate (error) =>
+      if error?
+        return callback null, false if @_isUserError error
+        return callback error
+      callback null, true
+
+  _isUserError: (error) =>
+    return unless error.code?
+    error.code < 500
 
   getAuth: (request) =>
     uuid = request.headers['x-meshblu-uuid']
