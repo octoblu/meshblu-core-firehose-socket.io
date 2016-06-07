@@ -7,7 +7,7 @@ shmock  = require 'shmock'
 
 describe 'receiving messages', ->
   beforeEach ->
-    @client = new RedisNS 'ns', redis.createClient('redis://localhost')
+    @client = new RedisNS 'ns', redis.createClient('redis://localhost', dropBufferSupport: true)
 
   context 'when successful', ->
     beforeEach ->

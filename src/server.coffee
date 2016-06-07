@@ -11,8 +11,14 @@ URL                   = require 'url'
 
 class Server
   constructor: (options) ->
-    {@port, @meshbluConfig, @aliasServerUri} = options
-    {@redisUri, @namespace} = options
+    {
+      @port
+      @meshbluConfig
+      @aliasServerUri
+      @redisUri
+      @firehoseRedisUri
+      @namespace
+    } = options
 
   address: =>
     @server.address()
@@ -20,9 +26,9 @@ class Server
   run: (callback) =>
     @server = http.createServer()
 
-    uuidAliasClient = new RedisNS 'uuid-alias', redis.createClient(@redisUri)
+    uuidAliasClient = new RedisNS 'uuid-alias', redis.createClient(@redisUri, dropBufferSupport: true)
     uuidAliasResolver = new UuidAliasResolver client: uuidAliasClient
-    @hydrantManagerFactory = new HydrantManagerFactory {uuidAliasResolver, @namespace, @redisUri}
+    @hydrantManagerFactory = new HydrantManagerFactory {uuidAliasResolver, @namespace, redisUri: @firehoseRedisUri}
 
     @server.on 'request', @onRequest
     @io = SocketIO @server, allowRequest: @verifyRequest

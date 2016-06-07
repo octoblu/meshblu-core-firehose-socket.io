@@ -38,6 +38,7 @@ class Connect
         port:   0xbabe
         protocol: 'http'
       redisUri: 'redis://localhost'
+      firehoseRedisUri: 'redis://localhost'
       namespace: 'ns'
 
     @sut.run callback

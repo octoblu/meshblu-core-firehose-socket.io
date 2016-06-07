@@ -8,6 +8,7 @@ class Command
       port:                         process.env.PORT || 80
       aliasServerUri:               process.env.ALIAS_SERVER_URI
       redisUri:                     process.env.REDIS_URI
+      firehoseRedisUri:             process.env.FIREHOSE_REDIS_URI
       namespace:                    process.env.NAMESPACE || 'messages'
       meshbluConfig:                new MeshbluConfig().toJSON()
 
@@ -18,6 +19,7 @@ class Command
   run: =>
     @panic new Error('Missing required environment variable: ALIAS_SERVER_URI') unless @serverOptions.aliasServerUri? # allowed to be empty
     @panic new Error('Missing required environment variable: REDIS_URI') if _.isEmpty @serverOptions.redisUri
+    @panic new Error('Missing required environment variable: FIREHOSE_REDIS_URI') if _.isEmpty @serverOptions.firehoseRedisUri
     @panic new Error('Missing required environment variable: MESHBLU_HOSTNAME') if _.isEmpty @serverOptions.meshbluConfig.hostname
     @panic new Error('Missing required environment variable: MESHBLU_PORT') if _.isEmpty @serverOptions.meshbluConfig.port
     @panic new Error('Missing required environment variable: MESHBLU_PROTOCOL') if _.isEmpty @serverOptions.meshbluConfig.protocol
