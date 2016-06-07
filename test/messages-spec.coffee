@@ -4,14 +4,22 @@ Connect = require './connect'
 redis   = require 'ioredis'
 RedisNS = require '@octoblu/redis-ns'
 shmock  = require 'shmock'
+enableDestroy = require 'server-destroy'
 
 describe 'receiving messages', ->
-  beforeEach ->
+  beforeEach (done) ->
     @client = new RedisNS 'ns', redis.createClient('redis://localhost', dropBufferSupport: true)
+    @client.on 'ready', done
+
+  beforeEach ->
+    @meshbluHttp = shmock 0xbabe
+    enableDestroy @meshbluHttp
+
+  afterEach (done) ->
+    @meshbluHttp.destroy done
 
   context 'when successful', ->
     beforeEach ->
-      @meshbluHttp = shmock 0xbabe
       @meshbluHttp.post('/authenticate')
         .reply 204
 
@@ -24,9 +32,6 @@ describe 'receiving messages', ->
 
     afterEach (done) ->
       @connect.shutItDown done
-
-    afterEach (done) ->
-      @meshbluHttp.close done
 
     describe 'when called', ->
 
@@ -46,7 +51,6 @@ describe 'receiving messages', ->
 
   context 'when failed', ->
     beforeEach ->
-      @meshbluHttp = shmock 0xbabe
       @meshbluHttp.post('/authenticate')
         .reply 403
 
@@ -57,9 +61,6 @@ describe 'receiving messages', ->
 
     afterEach (done) ->
       @connect.shutItDown done
-
-    afterEach (done) ->
-      @meshbluHttp.close done
 
     describe 'when called', ->
       it 'should have an error', ->
