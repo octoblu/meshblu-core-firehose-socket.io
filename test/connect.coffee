@@ -23,19 +23,19 @@ class Connect
       @connection.on 'connect_error', (error) =>
         callback error
 
-      @connection.connect uuid: 'masseuse', =>
+      @connection.connect =>
 
   shutItDown: (callback) =>
-    @connection.close()
-    @sut.stop callback
+    @connection.close =>
+      @sut.stop callback
 
   startServer: (callback) =>
     @sut = new Server
-      port: 0xcafe
+      port: 0xcaff
       meshbluConfig:
         hostname: 'localhost'
         server: 'localhost'
-        port:   0xbabe
+        port:   0xbabb
         protocol: 'http'
       redisUri: 'redis://localhost'
       firehoseRedisUri: 'redis://localhost'
@@ -47,7 +47,7 @@ class Connect
     @connection = new MeshbluFirehoseSocketIO
       meshbluConfig:
         hostname: 'localhost'
-        port: 0xcafe
+        port: 0xcaff
         uuid: 'masseuse'
         token: 'assassin'
         protocol: 'http'

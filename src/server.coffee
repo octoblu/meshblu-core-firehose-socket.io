@@ -4,7 +4,7 @@ SocketIO              = require 'socket.io'
 SocketIOHandler       = require './socket-io-handler'
 redis                 = require 'ioredis'
 RedisNS               = require '@octoblu/redis-ns'
-HydrantManagerFactory = require 'meshblu-core-manager-hydrant/factory'
+MultiHydrantFactory   = require 'meshblu-core-manager-hydrant/multi'
 UuidAliasResolver     = require 'meshblu-uuid-alias-resolver'
 MeshbluHttp           = require 'meshblu-http'
 URL                   = require 'url'
@@ -28,7 +28,10 @@ class Server
 
     uuidAliasClient = new RedisNS 'uuid-alias', redis.createClient(@redisUri, dropBufferSupport: true)
     uuidAliasResolver = new UuidAliasResolver client: uuidAliasClient
-    @hydrantManagerFactory = new HydrantManagerFactory {uuidAliasResolver, @namespace, redisUri: @firehoseRedisUri}
+    hydrantClient = new RedisNS @namespace, redis.createClient(@firehoseRedisUri, dropBufferSupport: true)
+    @hydrant = new MultiHydrantFactory {client: hydrantClient, uuidAliasResolver}
+    @hydrant.connect (error) =>
+      return callback(error) if error?
 
     @server.on 'request', @onRequest
     @io = SocketIO @server, allowRequest: @verifyRequest
@@ -39,7 +42,7 @@ class Server
     @server.close callback
 
   onConnection: (socket) =>
-    socketIOHandler = new SocketIOHandler {socket, @meshbluConfig, @hydrantManagerFactory}
+    socketIOHandler = new SocketIOHandler {socket, @meshbluConfig, @hydrant}
     socketIOHandler.initialize()
 
   onRequest: (request, response) =>

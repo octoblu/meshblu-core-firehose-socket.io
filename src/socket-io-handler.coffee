@@ -3,21 +3,18 @@ async       = require 'async'
 URL         = require 'url'
 
 class SocketIOHandler
-  constructor: ({@socket,@meshbluConfig,@hydrantManagerFactory}) ->
+  constructor: ({ @socket, @meshbluConfig, @hydrant }) ->
 
   initialize: =>
-    {pathname} = URL.parse @socket.client.request.url
+    { pathname } = URL.parse @socket.client.request.url
     # has a trailing slash
     uuid = _.first _.takeRight pathname.split(/\//), 2
 
-    @firehose = @hydrantManagerFactory.build()
-    @firehose.on 'message', (message) =>
+    @hydrant.subscribe { uuid }, =>
+    @hydrant.on "message:#{uuid}", (message) =>
       @socket.emit 'message', message
 
-    @firehose.connect {uuid}, (error) =>
-      throw error if error?
-
   onDisconnect: =>
-    @firehose?.close()
+    @hydrant.unsubscribe { uuid }, =>
 
 module.exports = SocketIOHandler

@@ -12,7 +12,7 @@ describe 'receiving messages', ->
     @client.on 'ready', done
 
   beforeEach ->
-    @meshbluHttp = shmock 0xbabe
+    @meshbluHttp = shmock 0xbabb
     enableDestroy @meshbluHttp
 
   afterEach (done) ->
@@ -45,6 +45,7 @@ describe 'receiving messages', ->
 
         @client.publish 'masseuse', JSON.stringify(message), (error) =>
           return done error if error?
+        return # promises, promises
 
       it 'should send a message', ->
         expect(@message).to.deep.equal {"metadata":{"code":204}, rawData: undefined}
