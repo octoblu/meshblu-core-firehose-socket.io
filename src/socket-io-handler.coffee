@@ -8,13 +8,16 @@ class SocketIOHandler
   initialize: =>
     { pathname } = URL.parse @socket.client.request.url
     # has a trailing slash
-    uuid = _.first _.takeRight pathname.split(/\//), 2
+    @uuid = _.first _.takeRight pathname.split(/\//), 2
 
-    @hydrant.subscribe { uuid }, =>
-    @hydrant.on "message:#{uuid}", (message) =>
-      @socket.emit 'message', message
+    @hydrant.subscribe { @uuid }, =>
+    @hydrant.on "message:#{@uuid}", @onMessage
+
+  onMessage: (message) =>
+    @socket.emit 'message', message
 
   onDisconnect: =>
-    @hydrant.unsubscribe { uuid }, =>
+    @hydrant.off "message:#{@uuid}", @onMessage
+    @hydrant.unsubscribe { @uuid }, =>
 
 module.exports = SocketIOHandler
