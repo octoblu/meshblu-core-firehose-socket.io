@@ -2,7 +2,7 @@ _                     = require 'lodash'
 http                  = require 'http'
 SocketIO              = require 'socket.io'
 SocketIOHandler       = require './socket-io-handler'
-redis                 = require 'ioredis'
+Redis                 = require 'ioredis'
 RedisNS               = require '@octoblu/redis-ns'
 MultiHydrantFactory   = require 'meshblu-core-manager-hydrant/multi'
 UuidAliasResolver     = require 'meshblu-uuid-alias-resolver'
@@ -24,11 +24,14 @@ class Server
     @server.address()
 
   run: (callback) =>
+    callback = _.once callback
     @server = http.createServer()
 
-    uuidAliasClient = new RedisNS 'uuid-alias', redis.createClient(@redisUri, dropBufferSupport: true)
+    uuidAliasClient = new RedisNS 'uuid-alias', new Redis(@redisUri, dropBufferSupport: true)
     uuidAliasResolver = new UuidAliasResolver client: uuidAliasClient
-    hydrantClient = new RedisNS @namespace, redis.createClient(@firehoseRedisUri, dropBufferSupport: true)
+    hydrantRedis = new Redis(@firehoseRedisUri, dropBufferSupport: true, autoResubscribe: false)
+    hydrantRedis.on 'error', callback
+    hydrantClient = new RedisNS @namespace, hydrantRedis
     @hydrant = new MultiHydrantFactory {client: hydrantClient, uuidAliasResolver}
     @hydrant.connect (error) =>
       return callback(error) if error?
