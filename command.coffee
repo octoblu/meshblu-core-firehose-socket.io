@@ -6,7 +6,7 @@ class Command
   constructor: ->
     @serverOptions =
       port:                         process.env.PORT || 80
-      aliasServerUri:               process.env.ALIAS_SERVER_URI
+      aliasServerUri:               process.env.ALIAS_SERVER_URI || ''
       redisUri:                     process.env.REDIS_URI
       firehoseRedisUri:             process.env.FIREHOSE_REDIS_URI
       namespace:                    process.env.NAMESPACE || 'messages'
