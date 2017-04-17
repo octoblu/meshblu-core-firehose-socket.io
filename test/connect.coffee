@@ -1,8 +1,5 @@
-_                       = require 'lodash'
 MeshbluFirehoseSocketIO = require 'meshblu-firehose-socket.io'
 async                   = require 'async'
-redis                   = require 'ioredis'
-RedisNS                 = require '@octoblu/redis-ns'
 Server                  = require '../src/server'
 
 class Connect
@@ -14,20 +11,25 @@ class Connect
       @createConnection
     ], (error) =>
       return callback error if error?
-      @connection.on 'connect', =>
+      @connection.once 'disconnect', => @connectionIsDisconnected = true
+      @connection.once 'connect_error', (error) =>
+        @connectionIsDisconnected = true
+        callback error
+      @connection.once 'connect', =>
         callback null,
           sut: @sut
           connection: @connection
           device: {uuid: 'masseuse', token: 'assassin'}
 
-      @connection.on 'connect_error', (error) =>
-        callback error
-
-      @connection.connect =>
+      @connection.connect()
 
   shutItDown: (callback) =>
-    @connection.close =>
+    @closeConnection =>
       @sut.stop callback
+
+  closeConnection: (callback) =>
+    return callback() if @connectionIsDisconnected
+    @connection.close callback
 
   startServer: (callback) =>
     @sut = new Server

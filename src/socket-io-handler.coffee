@@ -1,6 +1,5 @@
-_           = require 'lodash'
-async       = require 'async'
-URL         = require 'url'
+_   = require 'lodash'
+URL = require 'url'
 
 class SocketIOHandler
   constructor: ({ @socket, @meshbluConfig, @hydrant }) ->

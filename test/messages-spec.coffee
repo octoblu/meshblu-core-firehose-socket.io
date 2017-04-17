@@ -1,5 +1,5 @@
-async   = require 'async'
-_       = require 'lodash'
+{afterEach, beforeEach, context, describe, it} = global
+{expect} = require 'chai'
 Connect = require './connect'
 redis   = require 'ioredis'
 RedisNS = require '@octoblu/redis-ns'
@@ -34,7 +34,6 @@ describe 'receiving messages', ->
       @connect.shutItDown done
 
     describe 'when called', ->
-
       beforeEach (done) ->
         message =
           metadata:
@@ -57,8 +56,7 @@ describe 'receiving messages', ->
 
     beforeEach (done) ->
       @connect = new Connect
-      @connect.connect (@error, things) =>
-        done()
+      @connect.connect (@error) => done()
 
     afterEach (done) ->
       @connect.shutItDown done
